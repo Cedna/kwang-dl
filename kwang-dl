@@ -1,0 +1,77 @@
+#!/bin/bash
+RTMP_PREPEND_URL="rtmp://ongameuccw.gscdn.com/vod/mp4:/ogn/program/kyun_wang/vod/kyun_wang_"
+
+function get_ffmpeg_option() {
+	local _RTMP_URL=$1
+	local _FETCH_DATE=$2
+	local _OUTPUT=$3
+
+	echo "-re -i ${_RTMP_URL}.mp4 -threads 8 -vcodec copy -acodec copy ${_OUTPUT}/kyun_wang_${_FETCH_DATE}.mp4"
+
+}
+
+function get_date_option() {
+  echo "+%y%m%d --date='$1 days'"
+  
+}
+
+function set_fetch_date() {
+	if [[ -z $FETCH_DATE ]] ; then
+		FETCH_DATE=$1
+	else
+		echo "please select only one of absolute/relative"
+		usage 1
+	fi
+}
+
+function usage() {
+  echo "Usage: $0 [-a , -r] relativeday, date -d path"
+  echo "options: -h, help     print this message"
+  echo ""
+  echo "         -a, absolute date"
+  echo "           use specific absolute date instead of relative day."
+  echo "           only date format %y%m%d accepted. eg, 12/31/00 are 001231."
+  echo "         -r, relative day"
+  echo "           use relative day."
+  echo "           day parameter will be passed to"
+  echo "             date $(get_date_option relativeday) command"
+  echo "         -d, output directory"
+  echo "           set output directory path"
+  exit $1
+
+}
+
+while getopts "ha:r:d:" opt; do
+	case $opt in
+	h)
+		usage 0
+		;;
+	a)
+		set_fetch_date $OPTARG
+		;;
+	r)
+		cmd=$(get_date_option $OPTARG)
+		set_fetch_date $(date $cmd)
+		;;
+	d)
+		OUTPUT=$OPTARG
+		;;
+	\?)
+		usage 1
+		;;
+
+	esac
+done
+
+if [[ -z $@ ]] || [[ -z $FETCH_DATE ]] || [[ -z $OUTPUT ]]  ; then
+  usage 1
+
+fi
+
+RTMP_URL=${RTMP_PREPEND_URL}${FETCH_DATE}
+
+_ffmpeg_cmd=$(get_ffmpeg_option $RTMP_URL $FETCH_DATE $OUTPUT)
+echo "ffmpeg: $_ffmpeg_cmd"
+
+ffmpeg $_ffmpeg_cmd
+
