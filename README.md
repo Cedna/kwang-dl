@@ -3,6 +3,8 @@ kwang-dl
 
 A Download script(or maybe gui?) set for a famous Korean TV show, kyun-gim-e-wang-ka-ji(ko:켠김에 왕까지)
 
+NOTE: THIS SCRIPTS ARE CURRENTLY OUT-DATED! WILL NOT WORKS!
+
 Contact
 -------
 
